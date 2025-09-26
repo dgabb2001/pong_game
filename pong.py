@@ -14,6 +14,9 @@ wn.tracer(0)  # we will call wn.update() each frame
 PADDLE_SPEED = 10     # pixels per frame for paddles
 DT = 0.01             # frame delay (lower = faster)
 
+left_score = 0
+right_score = 0
+
 # key-hold flags (must exist before handlers use them)
 l_hold_up = False
 l_hold_down = False
@@ -35,6 +38,20 @@ def clamp_paddle(p):
     """Keep paddle on screen."""
     y = max(-250, min(250, p.ycor()))
     p.sety(y)
+
+# ========= Scoreboard =========
+score_pen = turtle.Turtle()
+score_pen.speed(0)
+score_pen.color("white")
+score_pen.penup()
+score_pen.hideturtle()
+score_pen.goto(0, 260)
+
+def update_scoreboard():
+    score_pen.clear()
+    score_pen.write(f"{left_score} : {right_score}", align="center", font=("Courier", 24, "normal"))
+
+update_scoreboard()
 
 # ========= Paddles & Ball =========
 paddle_l = make_paddle(-350)
@@ -112,9 +129,17 @@ while True:
 
     # ---- Missed paddles → reset ----
     if ball.xcor() > 390:
-        ball.goto(0, 0); ball.dx *= -1
+        left_score += 1
+        update_scoreboard()
+        ball.goto(0, 0)
+        ball.dx *= -1
+        time.sleep(0.2)
     if ball.xcor() < -390:
-        ball.goto(0, 0); ball.dx *= -1
+        right_score += 1
+        update_scoreboard()
+        ball.goto(0, 0)
+        ball.dx *= -1
+        time.sleep(0.2)
 
     # ---- Paddle collisions ----
     # Right paddle
