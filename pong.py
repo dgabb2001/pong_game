@@ -13,6 +13,12 @@ wn.tracer(0)  # we will call wn.update() each frame
 # ========= Settings & State =========
 PADDLE_SPEED = 10     # pixels per frame for paddles
 DT = 0.01             # frame delay (lower = faster)
+# ========= Settings & State =========
+PADDLE_SPEED = 10     # pixels per frame for paddles
+DT = 0.01             # frame delay (lower = faster)
+
+left_score = 0
+right_score = 0
 
 # key-hold flags (must exist before handlers use them)
 l_hold_up = False
@@ -35,6 +41,25 @@ def clamp_paddle(p):
     """Keep paddle on screen."""
     y = max(-250, min(250, p.ycor()))
     p.sety(y)
+
+def clamp_paddle(p):
+    """Keep paddle on screen."""
+    y = max(-250, min(250, p.ycor()))
+    p.sety(y)
+
+# ========= Scoreboard =========
+score_pen = turtle.Turtle()
+score_pen.speed(0)
+score_pen.color("white")
+score_pen.penup()
+score_pen.hideturtle()
+score_pen.goto(0, 260)
+
+def update_scoreboard():
+    score_pen.clear()
+    score_pen.write(f"{left_score} : {right_score}", align="center", font=("Courier", 24, "normal"))
+
+update_scoreboard()
 
 # ========= Paddles & Ball =========
 paddle_l = make_paddle(-350)
@@ -61,31 +86,7 @@ def l_down_release():
 
 def r_up_press():
     global r_hold_up; r_hold_up = True
-def r_up_release():
-    global r_hold_up; r_hold_up = False
-def r_down_press():
-    global r_hold_down; r_hold_down = True
-def r_down_release():
-    global r_hold_down; r_hold_down = False
-
-# ========= Bind Keys =========
-wn.listen()
-wn.onkeypress(l_up_press, "w")
-wn.onkeyrelease(l_up_release, "w")
-wn.onkeypress(l_down_press, "s")
-wn.onkeyrelease(l_down_release, "s")
-
-wn.onkeypress(r_up_press, "Up")
-wn.onkeyrelease(r_up_release, "Up")
-wn.onkeypress(r_down_press, "Down")
-wn.onkeyrelease(r_down_release, "Down")
-
-# Optional: press 'q' to close the window
-def quit_game():
-    wn.bye()
-wn.onkeypress(quit_game, "q")
-
-# ========= Game Loop =========
+@@ -89,39 +106,47 @@ wn.onkeypress(quit_game, "q")
 while True:
     wn.update()
 
@@ -115,6 +116,18 @@ while True:
         ball.goto(0, 0); ball.dx *= -1
     if ball.xcor() < -390:
         ball.goto(0, 0); ball.dx *= -1
+    if ball.xcor() > 390:
+        left_score += 1
+        update_scoreboard()
+        ball.goto(0, 0)
+        ball.dx *= -1
+        time.sleep(0.2)
+    if ball.xcor() < -390:
+        right_score += 1
+        update_scoreboard()
+        ball.goto(0, 0)
+        ball.dx *= -1
+        time.sleep(0.2)
 
     # ---- Paddle collisions ----
     # Right paddle
